@@ -1,0 +1,15 @@
+{
+  "name": "Belvia Order Calculator",
+  "short_name": "Belvia Calc",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "Brown.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
