@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>ورود به پنل Belvia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Favicon / Logo -->
+  <link rel="icon" type="image/png" href="Brown.png">
+
+  <style>
+    :root {
+      --accent: #a68b78;
+      --accent-dark: #8c6f5b;
+      --bg-color: #faf7f3;
+      --card-bg: #ffffff;
+      --text-main: #2a2a2a;
+      --border: #e3ddd8;
+      --muted: #7a736d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top, #ffffff 0%, #f2ede9 60%, #e7e1db 100%);
+      font-family: "Vazirmatn", sans-serif;
+      color: var(--text-main);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card-bg);
+      border-radius: 22px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+      padding: 22px 24px 26px;
+      text-align: center;
+    }
+
+    .logo-box {
+      margin-bottom: 10px;
+    }
+
+    .logo-box img {
+      height: 120px;
+      background: #fff;
+      border-radius: 50%;
+      padding: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    }
+
+    h1 {
+      margin: 6px 0 4px;
+      font-size: 1.1rem;
+      color: var(--accent-dark);
+    }
+
+    p.desc {
+      margin: 0 0 18px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    form {
+      text-align: right;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      direction: ltr;
+      text-align: left;
+    }
+
+    button {
+      width: 100%;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #fff;
+      box-shadow: 0 10px 18px rgba(166,139,120,0.35);
+      margin-top: 6px;
+    }
+
+    .error {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #b3261e;
+      min-height: 18px;
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: left;
+      direction: ltr;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="logo-box">
+      <img src="Brown.png" alt="Belvia Logo">
+    </div>
+    <h1>ورود به پنل داخلی Belvia</h1>
+    <p class="desc">این بخش فقط برای تیم داخلی Belvia است.</p>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <label for="username">Username</label>
+      <input id="username" type="text" autocomplete="username" placeholder="مثلاً Arman">
+
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="رمز ورود">
+
+      <button type="submit">ورود</button>
+
+      <div id="errorBox" class="error"></div>
+      <div class="hint">
+        <strong>Users:</strong> Arman, Lobaneh, Arghavan, Shervin  
+        <br>
+        <strong>Default password:</strong> <code>belvia123</code>
+      </div>
+    </form>
+  </div>
+
+<script>
+  // کاربرهای مجاز (می‌تونی پسوردها رو بعداً عوض کنی)
+  const USERS = {
+    "arman":   { displayName: "Arman",   password: "armanbelvia" },
+    "lobaneh": { displayName: "Lobaneh", password: "lobanehbelvia" },
+    "arghavan":{ displayName: "Arghavan",password: "arghavanbelvia" },
+    "shervin": { displayName: "Shervin", password: "shervinbelvia" }
+  };
+
+  function handleLogin(event) {
+    event.preventDefault();
+    const errorBox = document.getElementById("errorBox");
+    errorBox.textContent = "";
+
+    const usernameInput = document.getElementById("username").value.trim();
+    const passwordInput = document.getElementById("password").value;
+
+    if (!usernameInput || !passwordInput) {
+      errorBox.textContent = "لطفاً یوزرنیم و پسورد را کامل وارد کنید.";
+      return;
+    }
+
+    const key = usernameInput.toLowerCase();
+    const user = USERS[key];
+
+    if (!user || user.password !== passwordInput) {
+      errorBox.textContent = "یوزرنیم یا پسورد اشتباه است.";
+      return;
+    }
+
+    // ذخیره‌ی وضعیت ورود در localStorage
+    localStorage.setItem("belviaAuth", "YES");
+    localStorage.setItem("belviaAuthUser", user.displayName);
+
+    // هدایت به صفحه اصلی
+    window.location.href = "index.html";
+  }
+</script>
+
+</body>
+</html>
