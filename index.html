@@ -358,7 +358,7 @@
   <!-- نرخ یورو به ریال -->
   <div class="top-row">
     <span id="labelEurRate" style="font-size:0.85rem;">نرخ یورو به ریال (Bonbast):</span>
-    <input id="eurRateInput" type="number" placeholder="مثلاً 620000">
+    <input id="eurRateInput" type="number" placeholder="مثلاً 2020000">
     <button id="btnSetRate" class="btn-main" type="button" onclick="setEurRateFromInput()">ثبت نرخ</button>
     <button id="btnOpenBonbast" class="btn-ghost" type="button" onclick="openBonbast()">باز کردن Bonbast</button>
     <span id="eurRateLabel" style="font-size:0.8rem;color:#7a736d;">(هنوز تنظیم نشده)</span>
@@ -415,7 +415,7 @@
     <h2 class="section-title" id="sectionInternalTitle">نتایج داخلی برای Belvia</h2>
     <div class="result-block">
       <div class="result-line">
-        <span id="lblProfit">سود روی کالا (۲۲٪):</span><span id="r_profit"></span>
+        <span id="lblProfit">سود روی کالا (۱۸٪):</span><span id="r_profit"></span>
       </div>
       <div class="result-line">
         <span id="lblYourShip">هزینه باربری واقعی تو (۱۵ €/kg):</span><span id="r_yourShip"></span>
@@ -468,7 +468,7 @@ const texts = {
     lblShipCost: "هزینه باربری از مشتری:",
     lblFinalPriceEuro: "مبلغ نهایی قابل پرداخت (یورو):",
     lblFinalPriceRial: "مبلغ نهایی (ریال):",
-    lblProfit: "سود روی کالا (۲۲٪):",
+    lblProfit: "سود روی کالا (۱۸٪):",
     lblYourShip: "هزینه باربری واقعی تو (۱۵ €/kg):",
     lblYourTotal: "هزینه تمام‌شده (کالا + باربری):",
     lblProfitFinal: "سود نهایی این سفارش:",
@@ -733,9 +733,9 @@ function calculate() {
     weight += w;
   }
 
-  let rate = weight > 6 ? 25 : (base >= 100 ? 30 : 35);
+  let rate = weight > 6 ? 25 : (base >= 100 ? 21 : 24);
   const ship = weight * rate;
-  const profit = base * 0.22;
+  const profit = base * 0.18;
   const yourShip = weight * 15;
   const yourTotal = base + yourShip;
   const finalPrice = base + profit + ship;
@@ -797,8 +797,8 @@ function openInvoiceWindow() {
     const d = parseFloat(document.getElementById(`d_${i}`).value) || 0;
 
     const effNet = p * (1 - d / 100);
-    const retailBase = p * 1.22;
-    const retailFinal = effNet * 1.22;
+    const retailBase = p * 1.18;
+    const retailFinal = effNet * 1.18;
 
     baseNet     += effNet;
     totalRetail += retailFinal;
@@ -817,7 +817,7 @@ function openInvoiceWindow() {
       </tr>`;
   }
 
-  let rate = weight > 6 ? 25 : (baseNet >= 100 ? 30 : 35);
+  let rate = weight > 6 ? 25 : (baseNet >= 100 ? 21 : 24);
   const ship = weight * rate;
 
   const finalPriceCustomer = totalRetail + ship;
