@@ -405,6 +405,24 @@
 
     .btn-block { width: 100%; }
 
+    .btn-secondary {
+      background: var(--surface);
+      border-color: var(--line);
+      color: var(--brand-ink);
+    }
+
+    .btn-secondary:hover:not(:disabled) { background: var(--surface-2); }
+    .btn-secondary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .actions-row .btn { padding: 0 10px; font-size: 0.85rem; }
+
     /* ---------- لیست کالاها ---------- */
     .items { margin: 0 -20px; }
 
@@ -413,13 +431,14 @@
       gap: 10px;
       padding: 16px 20px;
       border-top: 1px solid var(--line);
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       grid-template-areas:
-        "head   head   head"
-        "name   name   name"
-        "desc   desc   desc"
-        "price  weight disc"
-        "net    net    net";
+        "head   head"
+        "name   name"
+        "desc   desc"
+        "price  qty"
+        "weight disc"
+        "net    net";
     }
 
     .item:first-child { border-top: 0; padding-top: 0; }
@@ -428,9 +447,10 @@
       .item {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         grid-template-areas:
-          "head  head   head  head"
-          "name  name   desc  desc"
-          "price weight disc  net";
+          "head  head   head   head"
+          "name  name   desc   desc"
+          "price qty    weight disc"
+          "net   net    net    net";
       }
     }
 
@@ -448,6 +468,8 @@
       color: var(--brand-ink);
     }
 
+    .item-actions { display: flex; gap: 2px; }
+
     .item-remove {
       height: 32px;
       padding: 0 10px;
@@ -462,12 +484,14 @@
       cursor: pointer;
     }
 
-    .item-remove:hover { background: var(--surface-2); color: var(--neg); }
+    .item-remove:hover { background: var(--surface-2); color: var(--ink); }
+    .item-remove[data-remove]:hover { color: var(--neg); }
     .item-remove svg { width: 16px; height: 16px; }
 
     .f-name { grid-area: name; }
     .f-desc { grid-area: desc; }
     .f-price { grid-area: price; }
+    .f-qty { grid-area: qty; }
     .f-weight { grid-area: weight; }
     .f-disc { grid-area: disc; }
 
@@ -494,26 +518,6 @@
       color: var(--ink);
     }
 
-    @media (min-width: 560px) {
-      .item-net {
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: flex-end;
-        gap: 4px;
-        padding: 0;
-        background: none;
-      }
-      .item-net span { font-size: 0.76rem; font-weight: 500; }
-      .item-net output {
-        display: flex;
-        align-items: center;
-        min-height: 42px;
-        padding: 0 10px;
-        border-radius: 10px;
-        background: var(--surface-2);
-      }
-    }
-
     /* ---------- خلاصه (رسید) ---------- */
     .summary {
       padding: 0;
@@ -528,6 +532,25 @@
       font-weight: 600;
       color: var(--muted);
     }
+
+    .receipt-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .order-no {
+      flex: none;
+      padding: 1px 8px;
+      border-radius: 999px;
+      background: var(--brand-soft);
+      color: var(--brand-ink);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .order-no:empty { display: none; }
 
     .receipt-for {
       margin: 2px 0 0;
@@ -760,27 +783,153 @@
       background: var(--ink);
       color: var(--paper);
       font-size: 0.85rem;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
       opacity: 0;
       transform: translateY(8px);
       pointer-events: none;
       transition: opacity 0.2s ease, transform 0.2s ease;
     }
 
-    .toast.is-shown { opacity: 1; transform: none; }
+    .toast.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+
+    .toast-action {
+      flex: none;
+      padding: 4px 10px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--paper);
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    .toast-action:empty { display: none; }
 
     @media (min-width: 1000px) {
       .toast { bottom: 24px; }
+    }
+
+    /* ---------- سفارش‌های ذخیره‌شده ---------- */
+    .orders-badge {
+      min-width: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--brand-ink);
+      color: var(--on-brand);
+      font-size: 0.7rem;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    .orders-badge:empty { display: none; }
+
+    .sheet {
+      width: min(560px, 100%);
+      max-height: min(720px, 92vh);
+      margin: auto;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 24px 64px rgba(30, 20, 15, 0.25);
+    }
+
+    .sheet::backdrop {
+      background: rgba(30, 20, 15, 0.45);
+    }
+
+    .sheet[open] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (max-width: 599px) {
+      .sheet {
+        width: 100%;
+        max-width: none;
+        max-height: 88vh;
+        margin: auto 0 0;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px 12px;
+    }
+
+    .sheet-head h2 { margin: 0; font-size: 1.05rem; }
+
+    .sheet-search { padding: 0 20px 12px; }
+
+    .orders-list {
+      flex: 1;
+      overflow-y: auto;
+      margin: 0;
+      padding: 0 0 12px;
+      list-style: none;
+      border-top: 1px solid var(--line);
+    }
+
+    .order-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2px 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .order-row.is-current { background: var(--surface-2); }
+
+    .order-name {
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .order-total { font-weight: 700; text-align: end; }
+
+    .order-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .order-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .orders-empty {
+      padding: 32px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
     }
 
     @media (max-width: 420px) {
       .app { padding-top: 12px; }
       .brand-logo { width: 44px; height: 44px; }
       .brand h1 { font-size: 1rem; }
+      .brand p { display: none; }
       .card { padding: 16px; }
       .items { margin: 0 -16px; }
       .item { padding: 14px 16px; }
-      .icon-btn.lang-btn .lang-label { display: none; }
+      .icon-btn .lang-label,
+      .icon-btn .orders-label { display: none; }
+      .header-actions { gap: 4px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -803,6 +952,11 @@
     </div>
 
     <div class="header-actions">
+      <button id="ordersBtn" class="icon-btn" type="button" onclick="openOrders()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+        <span class="orders-label" data-i18n="ordersBtn">سفارش‌ها</span>
+        <span id="ordersBadge" class="orders-badge num"></span>
+      </button>
       <button id="themeToggle" class="icon-btn" type="button" onclick="toggleTheme()">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -872,7 +1026,10 @@
     <!-- خلاصه سفارش -->
     <aside id="summary" class="card summary" aria-live="polite">
       <div class="receipt">
-        <p class="receipt-label" data-i18n="summaryTitle">مبلغ نهایی قابل پرداخت</p>
+        <div class="receipt-meta">
+          <p class="receipt-label" data-i18n="summaryTitle">مبلغ نهایی قابل پرداخت</p>
+          <span id="orderNo" class="order-no num"></span>
+        </div>
         <p id="receiptFor" class="receipt-for"></p>
 
         <div class="total">
@@ -893,6 +1050,16 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>
           <span data-i18n="invoiceBtn">فاکتور PDF برای مشتری</span>
         </button>
+        <div class="actions-row">
+          <button id="messageBtn" class="btn btn-secondary" type="button" onclick="shareMessage()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4 3 11l7 2.5L12.5 21 21 4Z"/><path d="m10 13.5 4-4"/></svg>
+            <span data-i18n="messageBtn">پیام برای مشتری</span>
+          </button>
+          <button id="saveBtn" class="btn btn-secondary" type="button" onclick="saveOrder(true)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>
+            <span data-i18n="saveBtn">ذخیره سفارش</span>
+          </button>
+        </div>
       </div>
 
       <div class="perforation" aria-hidden="true"></div>
@@ -932,7 +1099,26 @@
   </button>
 </div>
 
-<div id="toast" class="toast" role="status"></div>
+<!-- سفارش‌های ذخیره‌شده -->
+<dialog id="ordersDialog" class="sheet" aria-labelledby="ordersTitle">
+  <div class="sheet-head">
+    <h2 id="ordersTitle" data-i18n="ordersTitle">سفارش‌های ذخیره‌شده</h2>
+    <button class="icon-btn" type="button" onclick="closeOrders()" data-i18n-aria="close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="sheet-search field">
+    <span class="field-box">
+      <input id="ordersSearch" type="search" autocomplete="off" data-i18n-placeholder="ordersSearch" data-i18n-aria="ordersSearch">
+    </span>
+  </div>
+  <ul id="ordersList" class="orders-list"></ul>
+</dialog>
+
+<div id="toast" class="toast" role="status">
+  <span id="toastText"></span>
+  <button id="toastAction" class="toast-action" type="button"></button>
+</div>
 
 <script>
 // ---------- ثابت‌های محاسبه ----------
@@ -952,6 +1138,8 @@ let eurToRialRate = null;   // نرخ یورو به ریال
 let eurRateSavedAt = null;  // زمان ثبت نرخ
 let internalHidden = store.get("belviaHideInternal") === "1";
 let items = [];
+let currentOrderId = null;  // سفارش ذخیره‌شده‌ای که الان باز است
+let lastRemoved = null;     // برای «بازگردانی» بعد از حذف کالا
 
 const texts = {
   fa: {
@@ -973,18 +1161,23 @@ const texts = {
     labelCustomShipRate: "نرخ باربری از مشتری",
     sectionItems: "کالاها",
     newOrder: "سفارش جدید",
-    confirmNewOrder: "نام مشتری و همه‌ی کالاهای این سفارش پاک شود؟",
+    confirmNewOrder: "نام مشتری و کالاهای این فرم پاک شود؟ سفارش‌های ذخیره‌شده دست نمی‌خورند.",
     itemNo: "کالای {n}",
     remove: "حذف",
     removeAria: "حذف کالای {n}",
+    duplicate: "کپی",
+    duplicateAria: "کپی کالای {n}",
+    itemRemoved: "{name} حذف شد.",
+    undo: "بازگردانی",
     fName: "نام کالا",
     phName: "نام محصول",
     fDesc: "توضیحات",
     phDesc: "رنگ، سایز…",
-    fPrice: "قیمت",
-    fWeight: "وزن",
+    fPrice: "قیمت واحد",
+    fQty: "تعداد",
+    fWeight: "وزن واحد",
     fDiscount: "تخفیف",
-    fNet: "بعد از تخفیف",
+    fNet: "جمع این کالا (بعد از تخفیف)",
     addItem: "افزودن کالا",
     summaryTitle: "مبلغ نهایی قابل پرداخت",
     summaryFor: "برای {name}",
@@ -995,6 +1188,24 @@ const texts = {
     lblShipRate: "نرخ باربری از مشتری",
     lblShipCost: "هزینه باربری از مشتری",
     invoiceBtn: "فاکتور PDF برای مشتری",
+    messageBtn: "پیام برای مشتری",
+    saveBtn: "ذخیره سفارش",
+    saved: "ذخیره شد: {no}",
+    messageCopied: "پیام کپی شد. در تلگرام یا اینستاگرام بچسبانش.",
+    copyFailed: "پیام کپی نشد. مرورگر اجازه‌ی دسترسی به کلیپ‌بورد را نداد.",
+    ordersBtn: "سفارش‌ها",
+    ordersTitle: "سفارش‌های ذخیره‌شده",
+    ordersSearch: "جستجوی نام مشتری یا شماره فاکتور",
+    close: "بستن",
+    ordersEmpty: "هنوز سفارشی ذخیره نشده. با «ذخیره سفارش»، ساختن فاکتور یا فرستادن پیام، سفارش اینجا ذخیره می‌شود.",
+    ordersNoMatch: "سفارشی با این مشخصات پیدا نشد.",
+    orderItems: "{n} کالا",
+    openOrder: "باز کردن",
+    deleteOrder: "حذف",
+    editing: "باز است",
+    confirmDeleteOrder: "سفارش {no} برای همیشه حذف شود؟",
+    confirmReplaceDraft: "سفارش فعلی ذخیره نشده و با باز کردن این سفارش پاک می‌شود. ادامه می‌دهی؟",
+    orderOpened: "سفارش {no} باز شد.",
     sectionInternalTitle: "نتایج داخلی برای Belvia",
     hideInternal: "پنهان کن",
     showInternal: "نمایش",
@@ -1015,8 +1226,10 @@ const texts = {
       customer: "نام مشتری محترم",
       customerFallback: "مشتری",
       productFallback: "محصول {n}",
+      invoiceNo: "شماره فاکتور",
       date: "تاریخ",
       thIndex: "ردیف",
+      thQty: "تعداد",
       thName: "نام محصول",
       thDesc: "توضیحات",
       thUnitPrice: "قیمت واحد (€)",
@@ -1037,6 +1250,17 @@ const texts = {
       note1: "هزینه‌ی ارسال تا درب منزل (پست داخلی / پیک) بر عهده‌ی مشتری محترم است.",
       note2: "با توجه به نوسانات نرخ یورو، قیمت ریالی نهایی تا پایان روز کاری اعتبار دارد.",
       thanks: "از اعتماد و خرید شما صمیمانه متشکریم."
+    },
+    message: {
+      greeting: "سلام {name}",
+      greetingNoName: "سلام",
+      intro: "جزئیات سفارش شما ({no}):",
+      qty: "، {n} عدد",
+      goods: "جمع کالا",
+      shipping: "هزینه ارسال",
+      final: "مبلغ نهایی",
+      rial: "معادل {rial} (حدود {toman} تومان)",
+      rate: "نرخ یورو امروز: {rate}"
     }
   },
   en: {
@@ -1058,18 +1282,23 @@ const texts = {
     labelCustomShipRate: "Shipping rate to customer",
     sectionItems: "Products",
     newOrder: "New order",
-    confirmNewOrder: "Clear the customer name and all products in this order?",
+    confirmNewOrder: "Clear the customer name and products from this form? Saved orders are not affected.",
     itemNo: "Product {n}",
     remove: "Remove",
     removeAria: "Remove product {n}",
+    duplicate: "Copy",
+    duplicateAria: "Copy product {n}",
+    itemRemoved: "{name} removed.",
+    undo: "Undo",
     fName: "Product name",
     phName: "Product name",
     fDesc: "Description",
     phDesc: "Colour, size…",
-    fPrice: "Price",
-    fWeight: "Weight",
+    fPrice: "Unit price",
+    fQty: "Quantity",
+    fWeight: "Unit weight",
     fDiscount: "Discount",
-    fNet: "After discount",
+    fNet: "Line total (after discount)",
     addItem: "Add product",
     summaryTitle: "Final amount to pay",
     summaryFor: "For {name}",
@@ -1080,6 +1309,24 @@ const texts = {
     lblShipRate: "Shipping rate to customer",
     lblShipCost: "Shipping cost (customer)",
     invoiceBtn: "Customer PDF invoice",
+    messageBtn: "Customer message",
+    saveBtn: "Save order",
+    saved: "Saved: {no}",
+    messageCopied: "Message copied. Paste it into Telegram or Instagram.",
+    copyFailed: "The message wasn't copied. The browser blocked clipboard access.",
+    ordersBtn: "Orders",
+    ordersTitle: "Saved orders",
+    ordersSearch: "Search by customer or invoice number",
+    close: "Close",
+    ordersEmpty: "No saved orders yet. Orders are saved here when you tap Save order, create an invoice or send a message.",
+    ordersNoMatch: "No orders match your search.",
+    orderItems: "{n} products",
+    openOrder: "Open",
+    deleteOrder: "Delete",
+    editing: "Open now",
+    confirmDeleteOrder: "Delete order {no} permanently?",
+    confirmReplaceDraft: "The current order isn't saved and will be cleared if you open this one. Continue?",
+    orderOpened: "Order {no} opened.",
     sectionInternalTitle: "Internal results (Belvia)",
     hideInternal: "Hide",
     showInternal: "Show",
@@ -1100,8 +1347,10 @@ const texts = {
       customer: "Customer",
       customerFallback: "Customer",
       productFallback: "Product {n}",
+      invoiceNo: "Invoice no.",
       date: "Date",
       thIndex: "No.",
+      thQty: "Qty",
       thName: "Product",
       thDesc: "Description",
       thUnitPrice: "Unit price (€)",
@@ -1122,6 +1371,17 @@ const texts = {
       note1: "Local delivery cost inside Iran (post / courier) is paid by the customer.",
       note2: "Due to EUR exchange rate fluctuations, the Rial amount is valid until the end of the business day.",
       thanks: "Thank you sincerely for shopping with Belvia."
+    },
+    message: {
+      greeting: "Hello {name}",
+      greetingNoName: "Hello",
+      intro: "Your order details ({no}):",
+      qty: " ×{n}",
+      goods: "Goods total",
+      shipping: "Shipping",
+      final: "Final amount",
+      rial: "Equivalent to {rial} (about {toman} Toman)",
+      rate: "Today's EUR rate: {rate}"
     }
   }
 };
@@ -1168,12 +1428,20 @@ function sameDay(a, b) {
 }
 
 let toastTimer = null;
-function showToast(msg) {
+let toastHandler = null;
+function showToast(msg, actionLabel, onAction) {
   const el = document.getElementById("toast");
-  el.textContent = msg;
+  document.getElementById("toastText").textContent = msg;
+  document.getElementById("toastAction").textContent = actionLabel || "";
+  toastHandler = onAction || null;
   el.classList.add("is-shown");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("is-shown"), 3200);
+  toastTimer = setTimeout(hideToast, onAction ? 6000 : 3200);
+}
+
+function hideToast() {
+  document.getElementById("toast").classList.remove("is-shown");
+  toastHandler = null;
 }
 
 // ---------- ذخیره و بازیابی ----------
@@ -1194,6 +1462,7 @@ function loadState() {
     if (draft && Array.isArray(draft.items)) {
       document.getElementById("customerName").value = draft.customer || "";
       items = draft.items.map(blankItemFrom);
+      currentOrderId = draft.orderId || null;
     }
   } catch (e) {}
 
@@ -1206,6 +1475,7 @@ function blankItemFrom(src) {
     name: src.name || "",
     desc: src.desc || "",
     price: src.price || "",
+    qty: src.qty || "",
     weight: src.weight || "",
     discount: src.discount || ""
   };
@@ -1214,7 +1484,8 @@ function blankItemFrom(src) {
 function saveDraft() {
   store.set("belviaDraft", JSON.stringify({
     customer: document.getElementById("customerName").value,
-    items: items
+    items: items,
+    orderId: currentOrderId
   }));
 }
 
@@ -1246,6 +1517,10 @@ function applyLanguage() {
   document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     el.placeholder = tr(el.dataset.i18nPlaceholder);
   });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => {
+    el.setAttribute("aria-label", tr(el.dataset.i18nAria));
+    el.title = tr(el.dataset.i18nAria);
+  });
 
   const langBtn = document.getElementById("langToggle");
   langBtn.setAttribute("aria-label", tr("langAria"));
@@ -1258,6 +1533,8 @@ function applyLanguage() {
   renderItems();
   updateRateStatus();
   updateInternal();
+  updateOrderInfo();
+  if (document.getElementById("ordersDialog").open) renderOrders();
 }
 
 function toggleLanguage() {
@@ -1312,10 +1589,16 @@ function getShipRate() {
 }
 
 // ---------- کالاها ----------
+// تعداد خالی یعنی ۱
+function itemQty(item) {
+  const q = parseNum(item.qty);
+  return isNaN(q) ? 1 : Math.max(0, q);
+}
+
 function itemNet(item) {
   const p = parseNum(item.price) || 0;
   const d = parseNum(item.discount) || 0;
-  return p * (1 - d / 100);
+  return p * itemQty(item) * (1 - d / 100);
 }
 
 function renderItems() {
@@ -1326,10 +1609,16 @@ function renderItems() {
       <div class="item" data-i="${i}">
         <div class="item-head">
           <span class="item-no">${escapeHtml(tr("itemNo", { n: n }))}</span>
-          <button class="item-remove" type="button" data-remove="${i}" aria-label="${escapeHtml(tr("removeAria", { n: n }))}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
-            ${escapeHtml(tr("remove"))}
-          </button>
+          <span class="item-actions">
+            <button class="item-remove" type="button" data-duplicate="${i}" aria-label="${escapeHtml(tr("duplicateAria", { n: n }))}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+              ${escapeHtml(tr("duplicate"))}
+            </button>
+            <button class="item-remove" type="button" data-remove="${i}" aria-label="${escapeHtml(tr("removeAria", { n: n }))}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+              ${escapeHtml(tr("remove"))}
+            </button>
+          </span>
         </div>
         <label class="field f-name">
           <span class="field-label">${escapeHtml(tr("fName"))}</span>
@@ -1342,6 +1631,10 @@ function renderItems() {
         <label class="field f-price">
           <span class="field-label">${escapeHtml(tr("fPrice"))}</span>
           <span class="field-box"><input class="ltr" type="text" inputmode="decimal" data-k="price" value="${escapeHtml(item.price)}" placeholder="0.00"><span class="unit">€</span></span>
+        </label>
+        <label class="field f-qty">
+          <span class="field-label">${escapeHtml(tr("fQty"))}</span>
+          <span class="field-box"><input class="ltr" type="text" inputmode="numeric" data-k="qty" value="${escapeHtml(item.qty)}" placeholder="1"></span>
         </label>
         <label class="field f-weight">
           <span class="field-label">${escapeHtml(tr("fWeight"))}</span>
@@ -1372,22 +1665,55 @@ function addItem(focus) {
   }
 }
 
+function duplicateItem(i) {
+  items.splice(i + 1, 0, blankItemFrom(items[i]));
+  renderItems();
+  saveDraft();
+  const copy = document.querySelector(`.item[data-i="${i + 1}"] input[data-k="name"]`);
+  if (copy) copy.focus();
+}
+
 function removeItem(i) {
-  if (items.length === 1) {
+  const removed = items[i];
+  const wasOnly = items.length === 1;
+  if (wasOnly) {
     items[0] = blankItemFrom();
   } else {
     items.splice(i, 1);
   }
+  lastRemoved = { item: removed, index: i, wasOnly: wasOnly };
+  renderItems();
+  saveDraft();
+
+  const name = removed.name.trim() || tr("itemNo", { n: localDigits(i + 1) });
+  showToast(tr("itemRemoved", { name: name }), tr("undo"), undoRemove);
+}
+
+function undoRemove() {
+  if (!lastRemoved) return;
+  if (lastRemoved.wasOnly) {
+    items[0] = lastRemoved.item;
+  } else {
+    items.splice(lastRemoved.index, 0, lastRemoved.item);
+  }
+  lastRemoved = null;
   renderItems();
   saveDraft();
 }
 
+function formIsEmpty() {
+  return !document.getElementById("customerName").value.trim() &&
+    items.every(item => Object.values(item).every(v => !String(v).trim()));
+}
+
 function newOrder() {
-  if (!confirm(tr("confirmNewOrder"))) return;
+  if (!formIsEmpty() && !confirm(tr("confirmNewOrder"))) return;
   document.getElementById("customerName").value = "";
   items = [blankItemFrom()];
+  currentOrderId = null;
   renderItems();
   saveDraft();
+  updateOrderInfo();
   document.querySelector('.item input[data-k="name"]').focus();
 }
 
@@ -1398,7 +1724,7 @@ function computeTotals() {
   for (const item of items) {
     const w = parseNum(item.weight) || 0;
     base += itemNet(item);
-    weight += w;
+    weight += w * itemQty(item);
   }
 
   const rate = getShipRate();
@@ -1452,6 +1778,8 @@ function updateTotals() {
   const ready = hasPricedItem();
   document.getElementById("invoiceBtn").disabled = !ready;
   document.getElementById("barInvoiceBtn").disabled = !ready;
+  document.getElementById("messageBtn").disabled = !ready;
+  document.getElementById("saveBtn").disabled = !ready;
 }
 
 function focusRate() {
@@ -1478,13 +1806,251 @@ function toggleInternal() {
   updateInternal();
 }
 
+// ---------- سفارش‌های ذخیره‌شده ----------
+const MAX_ORDERS = 300;
+
+function loadOrders() {
+  try {
+    const list = JSON.parse(store.get("belviaOrders") || "[]");
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveOrders(list) {
+  store.set("belviaOrders", JSON.stringify(list.slice(0, MAX_ORDERS)));
+}
+
+function nextInvoiceNo() {
+  const seq = (parseInt(store.get("belviaInvoiceSeq"), 10) || 0) + 1;
+  store.set("belviaInvoiceSeq", String(seq));
+  return "BLV-" + String(seq).padStart(4, "0");
+}
+
+function currentOrder() {
+  return currentOrderId ? loadOrders().find(o => o.id === currentOrderId) || null : null;
+}
+
+// سفارش فعلی را ذخیره یا به‌روز می‌کند و رکوردش را برمی‌گرداند
+function saveOrder(announce) {
+  if (!hasPricedItem()) {
+    showToast(tr("noItems"));
+    return null;
+  }
+
+  const orders = loadOrders();
+  const r = computeTotals();
+  const now = Date.now();
+  const existing = currentOrderId ? orders.findIndex(o => o.id === currentOrderId) : -1;
+  const prev = existing >= 0 ? orders.splice(existing, 1)[0] : null;
+
+  const record = {
+    id: prev ? prev.id : now.toString(36) + Math.random().toString(36).slice(2, 6),
+    no: prev ? prev.no : nextInvoiceNo(),
+    customer: document.getElementById("customerName").value.trim(),
+    items: items.map(blankItemFrom),
+    finalPrice: r.finalPrice,
+    rial: eurToRialRate ? r.finalPrice * eurToRialRate : null,
+    createdAt: prev ? prev.createdAt : now,
+    updatedAt: now
+  };
+
+  orders.unshift(record);
+  saveOrders(orders);
+  currentOrderId = record.id;
+  saveDraft();
+  updateOrderInfo();
+  if (announce) showToast(tr("saved", { no: record.no }));
+  return record;
+}
+
+function updateOrderInfo() {
+  const order = currentOrder();
+  if (currentOrderId && !order) currentOrderId = null;
+  document.getElementById("orderNo").textContent = order ? order.no : "";
+  const count = loadOrders().length;
+  document.getElementById("ordersBadge").textContent = count ? localDigits(count) : "";
+}
+
+function normalizeSearch(s) {
+  return String(s || "")
+    .replace(/[۰-۹]/g, d => d.charCodeAt(0) - 0x06F0)
+    .replace(/[٠-٩]/g, d => d.charCodeAt(0) - 0x0660)
+    .replace(/ي/g, "ی").replace(/ك/g, "ک")
+    .toLowerCase().trim();
+}
+
+function renderOrders() {
+  const list = document.getElementById("ordersList");
+  const orders = loadOrders();
+  const q = normalizeSearch(document.getElementById("ordersSearch").value);
+  const shown = q
+    ? orders.filter(o => normalizeSearch(o.customer + " " + o.no).includes(q))
+    : orders;
+
+  if (shown.length === 0) {
+    list.innerHTML = `<li class="orders-empty">${escapeHtml(tr(orders.length ? "ordersNoMatch" : "ordersEmpty"))}</li>`;
+    return;
+  }
+
+  const locale = currentLang === "fa" ? "fa-IR" : "en-GB";
+  list.innerHTML = shown.map(o => {
+    const isCurrent = o.id === currentOrderId;
+    const date = new Date(o.updatedAt).toLocaleDateString(locale);
+    const name = o.customer || texts[currentLang].invoice.customerFallback;
+    const sub = [o.no, date, tr("orderItems", { n: localDigits(o.items.length) })];
+    if (isCurrent) sub.push(tr("editing"));
+    return `
+      <li class="order-row${isCurrent ? " is-current" : ""}">
+        <span class="order-name">${escapeHtml(name)}</span>
+        <span class="order-total num">${fmtEur(o.finalPrice)} €</span>
+        <span class="order-sub">${sub.map(x => `<bdi>${escapeHtml(x)}</bdi>`).join(currentLang === "fa" ? "، " : ", ")}</span>
+        <span class="order-sub" style="text-align:end;">${o.rial ? escapeHtml(fmtRial(o.rial)) : ""}</span>
+        <span class="order-actions">
+          <button class="btn btn-quiet" type="button" data-open="${o.id}">${escapeHtml(tr("openOrder"))}</button>
+          <button class="btn btn-quiet" type="button" data-delete="${o.id}">${escapeHtml(tr("deleteOrder"))}</button>
+        </span>
+      </li>`;
+  }).join("");
+}
+
+function openOrders() {
+  document.getElementById("ordersSearch").value = "";
+  renderOrders();
+  document.getElementById("ordersDialog").showModal();
+}
+
+function closeOrders() {
+  document.getElementById("ordersDialog").close();
+}
+
+function openSavedOrder(id) {
+  const order = loadOrders().find(o => o.id === id);
+  if (!order) return;
+
+  if (id !== currentOrderId && hasPricedItem()) {
+    if (currentOrderId) {
+      saveOrder(false);
+    } else if (!confirm(tr("confirmReplaceDraft"))) {
+      return;
+    }
+  }
+
+  document.getElementById("customerName").value = order.customer;
+  items = order.items.map(blankItemFrom);
+  if (items.length === 0) items.push(blankItemFrom());
+  currentOrderId = order.id;
+  renderItems();
+  saveDraft();
+  updateOrderInfo();
+  closeOrders();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  showToast(tr("orderOpened", { no: order.no }));
+}
+
+function deleteSavedOrder(id) {
+  const orders = loadOrders();
+  const order = orders.find(o => o.id === id);
+  if (!order || !confirm(tr("confirmDeleteOrder", { no: order.no }))) return;
+  saveOrders(orders.filter(o => o.id !== id));
+  if (id === currentOrderId) {
+    currentOrderId = null;
+    saveDraft();
+  }
+  updateOrderInfo();
+  renderOrders();
+}
+
+// ---------- پیام برای مشتری ----------
+function buildMessage(no) {
+  const t = texts[currentLang];
+  const m = t.message;
+  const customer = document.getElementById("customerName").value.trim();
+  const lines = [];
+
+  lines.push(customer ? m.greeting.replace("{name}", customer) : m.greetingNoName);
+  lines.push(m.intro.replace("{no}", no));
+  lines.push("");
+
+  let totalRetail = 0;
+  let weight = 0;
+  items.forEach((item, i) => {
+    const p = parseNum(item.price) || 0;
+    if (p <= 0) return;
+    const q = itemQty(item);
+    const retail = itemNet(item) * (1 + PROFIT_RATE);
+    totalRetail += retail;
+    weight += (parseNum(item.weight) || 0) * q;
+
+    let line = localDigits(i + 1) + ". " + (item.name.trim() || t.invoice.productFallback.replace("{n}", i + 1));
+    if (item.desc.trim()) line += " (" + item.desc.trim() + ")";
+    if (q !== 1) line += m.qty.replace("{n}", localDigits(q));
+    line += ": " + fmtEur(retail) + " €";
+    lines.push(line);
+  });
+
+  const ship = weight * getShipRate();
+  const final = totalRetail + ship;
+  lines.push("");
+  lines.push(m.goods + ": " + fmtEur(totalRetail) + " €");
+  lines.push(m.shipping + ": " + fmtEur(ship) + " €");
+  lines.push(m.final + ": " + fmtEur(final) + " €");
+
+  if (eurToRialRate) {
+    const rial = final * eurToRialRate;
+    lines.push(m.rial.replace("{rial}", fmtRial(rial)).replace("{toman}", localDigits(Math.round(rial / 10))));
+    lines.push("");
+    lines.push(m.rate.replace("{rate}", fmtRial(eurToRialRate)));
+    lines.push(t.invoice.note2);
+  }
+
+  lines.push("");
+  lines.push(t.invoice.thanks.trim());
+  return lines.join("\n");
+}
+
+function copyText(text) {
+  const done = () => showToast(tr("messageCopied"));
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+    showToast(tr(ok ? "messageCopied" : "copyFailed"));
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done, fallback);
+  } else {
+    fallback();
+  }
+}
+
+function shareMessage() {
+  const record = saveOrder(false);
+  if (!record) return;
+  const text = buildMessage(record.no);
+  const touch = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  if (touch && navigator.share) {
+    navigator.share({ text: text }).catch(err => {
+      if (err && err.name !== "AbortError") copyText(text);
+    });
+  } else {
+    copyText(text);
+  }
+}
+
 // ---------- فاکتور ----------
 function openInvoiceWindow() {
   const t = texts[currentLang].invoice;
-  if (!hasPricedItem()) {
-    showToast(tr("noItems"));
-    return;
-  }
+  const record = saveOrder(false);
+  if (!record) return;
 
   const isFa = currentLang === "fa";
   const customer = document.getElementById("customerName").value.trim() || t.customerFallback;
@@ -1497,10 +2063,11 @@ function openInvoiceWindow() {
     const name = item.name.trim() || t.productFallback.replace("{n}", i + 1);
     const desc = item.desc.trim();
     const p = parseNum(item.price) || 0;
-    const w = parseNum(item.weight) || 0;
+    const q = itemQty(item);
+    const w = (parseNum(item.weight) || 0) * q;
     const d = parseNum(item.discount) || 0;
 
-    const effNet = p * (1 - d / 100);
+    const effNet = itemNet(item);
     const retailBase = p * (1 + PROFIT_RATE);
     const retailFinal = effNet * (1 + PROFIT_RATE);
 
@@ -1513,6 +2080,7 @@ function openInvoiceWindow() {
         <td class="name">${escapeHtml(name)}</td>
         <td class="desc">${escapeHtml(desc)}</td>
         <td class="n">${fmtEur(retailBase)} €</td>
+        <td class="n">${+q.toFixed(2)}</td>
         <td class="n">${d ? +d.toFixed(2) + "%" : "—"}</td>
         <td class="n strong">${fmtEur(retailFinal)} €</td>
         <td class="n">${fmtEur(w)} kg</td>
@@ -1537,7 +2105,7 @@ function openInvoiceWindow() {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(t.title)} - ${escapeHtml(customer)}</title>
+<title>${escapeHtml(t.title)} ${record.no} - ${escapeHtml(customer)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
@@ -1550,7 +2118,7 @@ body{font-family:"Vazirmatn",sans-serif;margin:0;background:#F5F2F0;color:#2A221
 .body{padding:20px 24px 24px}
 .info-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px 24px;font-size:.88rem;margin-bottom:14px}
 .table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:520px}
+table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:560px}
 th,td{padding:8px 6px;text-align:center;border-bottom:1px solid #EDE6E1}
 th{background:#F1ECE8;color:#5A473D;font-weight:600;white-space:nowrap}
 td.name{font-weight:600}
@@ -1589,6 +2157,7 @@ td.strong{font-weight:700}
   <div class="body">
     <div class="info-row">
       <div>${escapeHtml(t.customer)}: <strong>${escapeHtml(customer)}</strong></div>
+      <div>${escapeHtml(t.invoiceNo)}: <strong><bdi dir="ltr">${record.no}</bdi></strong></div>
       <div>${escapeHtml(t.date)}: <strong>${date}</strong></div>
     </div>
 
@@ -1600,6 +2169,7 @@ td.strong{font-weight:700}
             <th>${escapeHtml(t.thName)}</th>
             <th>${escapeHtml(t.thDesc)}</th>
             <th>${escapeHtml(t.thUnitPrice)}</th>
+            <th>${escapeHtml(t.thQty)}</th>
             <th>${escapeHtml(t.thDiscount)}</th>
             <th>${escapeHtml(t.thFinalPrice)}</th>
             <th>${escapeHtml(t.thWeight)}</th>
@@ -1664,8 +2234,29 @@ document.getElementById("itemsList").addEventListener("input", e => {
 });
 
 document.getElementById("itemsList").addEventListener("click", e => {
-  const btn = e.target.closest("[data-remove]");
-  if (btn) removeItem(+btn.dataset.remove);
+  const remove = e.target.closest("[data-remove]");
+  if (remove) removeItem(+remove.dataset.remove);
+  const dup = e.target.closest("[data-duplicate]");
+  if (dup) duplicateItem(+dup.dataset.duplicate);
+});
+
+document.getElementById("toastAction").addEventListener("click", () => {
+  const handler = toastHandler;
+  hideToast();
+  if (handler) handler();
+});
+
+const ordersDialog = document.getElementById("ordersDialog");
+document.getElementById("ordersSearch").addEventListener("input", renderOrders);
+document.getElementById("ordersList").addEventListener("click", e => {
+  const open = e.target.closest("[data-open]");
+  if (open) openSavedOrder(open.dataset.open);
+  const del = e.target.closest("[data-delete]");
+  if (del) deleteSavedOrder(del.dataset.delete);
+});
+// کلیک روی پس‌زمینه پنجره را می‌بندد
+ordersDialog.addEventListener("click", e => {
+  if (e.target === ordersDialog) closeOrders();
 });
 
 // Enter در آخرین کالا ← کالای جدید
