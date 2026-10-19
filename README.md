@@ -4,6 +4,17 @@ An internal tool for **Belvia Online Shop** that works out the final price of a 
 
 Live at **[armannss.github.io](https://armannss.github.io)**. It works in any browser and can be installed on a phone's home screen as an app.
 
+## What's new in version 2.1
+
+- **Customer message.** One tap writes the order out as a message (products, totals in euros, Rial and Toman, today's rate) ready to paste into Telegram or Instagram. On a phone it opens the share menu.
+- **Saved orders with invoice numbers.** Every saved order gets a number (BLV-0001, BLV-0002 …). The **Orders** list lets you search by customer or number, reopen an order to change it, or delete it. Orders are saved automatically when you create an invoice or a message.
+- **Quantity.** Each product has a quantity, so two of the same item no longer need two rows. The invoice shows it in its own column.
+- **Copy a product.** Duplicates a product, for the same item in another colour or size.
+- **Undo.** A deleted product can be brought back from the message that appears.
+- **Works offline.** After the first visit, the app opens without an internet connection.
+
+> Saved orders live in the browser on each device, so orders saved on one phone don't appear on another.
+
 ## What's new in version 2
 
 This version is a full redesign of the calculator. The pricing formulas are the same, so an order adds up to exactly what it did before.
@@ -36,15 +47,18 @@ This version is a full redesign of the calculator. The pricing formulas are the 
 1. Enter the customer's name.
 2. Enter today's EUR → Rial rate. The **Open Bonbast** link opens [bonbast.com](https://www.bonbast.com/) to check it.
 3. Check the customer shipping rate (default **25 €/kg**).
-4. Add each product with its price in euros, its weight in kg and any discount.
-5. Read the totals in the summary, then tap **Customer PDF invoice** to print the invoice or save it as a PDF.
-6. Tap **New order** to clear the form for the next customer. The rates are kept.
+4. Add each product with its unit price in euros, quantity, unit weight in kg and any discount.
+5. Read the totals in the summary, then:
+   - tap **Customer message** to copy or share the order as a message, or
+   - tap **Customer PDF invoice** to print the invoice or save it as a PDF.
+6. Tap **New order** to clear the form for the next customer. The rates are kept, and earlier orders stay in **Orders**.
 
 ## How the price is worked out
 
 | Item | Formula |
 | --- | --- |
-| Goods total | Σ price × (1 − discount %) |
+| Goods total | Σ unit price × quantity × (1 − discount %) |
+| Total weight | Σ unit weight × quantity |
 | Customer shipping | total weight × customer rate (default 25 €/kg) |
 | Margin on goods | goods total × 18% |
 | **Final price (customer)** | goods total + margin + customer shipping |
@@ -61,7 +75,7 @@ The 18% margin, 15 €/kg real shipping cost and 25 €/kg default rate are set 
 | --- | --- |
 | `index.html` | The whole app: layout, styles, calculations and invoice |
 | `manifest.json` | Lets the app be installed on a phone's home screen |
-| `service-worker.js` | Required for installing as an app |
+| `service-worker.js` | Keeps a copy of the app so it opens offline |
 | `Brown.png` | Belvia logo and app icon |
 | `screenshots/` | Images used in this README |
 
